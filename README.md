@@ -8,6 +8,27 @@ A modern, responsive React-based chat interface prototype with AI assistant capa
 
 Please note: This is a front-end prototype and does not include a full backend, production-ready algorithms, or complete functional logic. It is intended for demonstration and development purposes.
 
+## 🏗️ Architecture
+
+The application consists of a modular frontend structure designed for scalability:
+
+- **Frontend** (`/frontend`) - React-based UI with Tailwind CSS
+  - Modern component architecture
+  - PWA-ready configuration
+  - Responsive design with mobile optimization
+
+- **Future Components**
+  - Backend API integration
+  - Database layer
+  - Authentication system
+
+## 🔗 Quick Links
+
+- 📖 [Frontend Documentation](./frontend/README.md)
+- 🔧 [Frontend Configuration](./frontend)
+- 📄 [License](./LICENSE)
+- 📋 [Third-party Licenses](./NOTICE)
+
 ## 🚀 Features
 
 - **Modern Chat Interface**: Clean, intuitive design with message bubbles and timestamps
@@ -39,7 +60,7 @@ Please note: This is a front-end prototype and does not include a full backend, 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd web_app_ai/frontend
+   cd ai_webui_app/frontend
    ```
 
 2. **Install dependencies**
@@ -58,30 +79,32 @@ Please note: This is a front-end prototype and does not include a full backend, 
 ## 🎨 Project Structure
 
 ```
-frontend/
-├── public/
-│   ├── index.html          # Main HTML template
-│   ├── manifest.json       # PWA manifest
-│   ├── robots.txt          # Search engine configuration
-│   ├── favicon.ico         # Site icon
-│   ├── logo192.png         # PWA icon 192x192
-│   └── logo512.png         # PWA icon 512x512
-├── src/
-│   ├── App.jsx             # Main application component
-│   ├── index.js            # Application entry point
-│   ├── index.css           # Global styles and Tailwind imports
-│   ├── logo.svg            # Application logo
-│   ├── reportWebVitals.js  # Web performance metrics
-│   └── setupTests.js       # Jest test configuration
-├── node_modules/           # Dependencies (auto-generated)
-├── package.json            # Dependencies and scripts
-├── package-lock.json       # Locked dependency versions
-├── tailwind.config.js      # Tailwind CSS configuration
-├── postcss.config.js       # PostCSS configuration
-├── .gitignore              # Git ignore rules
-├── LICENSE                 # MIT License
-├── NOTICE                  # Third-party licenses
-└── README.md               # This documentation
+ai_webui_app/
+├── frontend/                  # React frontend application
+│   ├── src/                   # Source code
+│   │   ├── App.jsx           # Main application component
+│   │   ├── index.js          # Application entry point
+│   │   ├── index.css         # Global styles and Tailwind imports
+│   │   ├── logo.svg          # Application logo
+│   │   ├── reportWebVitals.js # Web performance metrics
+│   │   └── setupTests.js      # Jest test configuration
+│   ├── public/                # Public assets
+│   │   ├── index.html        # Main HTML template
+│   │   ├── manifest.json     # PWA manifest
+│   │   ├── robots.txt        # Search engine configuration
+│   │   ├── favicon.ico       # Site icon
+│   │   ├── logo192.png       # PWA icon 192x192
+│   │   └── logo512.png       # PWA icon 512x512
+│   ├── package.json           # Dependencies and scripts
+│   ├── package-lock.json      # Locked dependency versions
+│   ├── tailwind.config.js     # Tailwind CSS configuration
+│   ├── postcss.config.js      # PostCSS configuration
+│   ├── README.md              # Frontend documentation
+│   └── node_modules/          # Dependencies (auto-generated)
+├── LICENSE                     # MIT License
+├── NOTICE                      # Third-party licenses
+├── .gitignore                  # Git ignore rules
+└── README.md                   # This documentation
 ```
 
 ## 🎯 Available Scripts
