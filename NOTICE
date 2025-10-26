@@ -15,6 +15,9 @@ This software includes third-party libraries and dependencies that are subject t
 ## Icons and Graphics
 - **Lucide React** (ISC License) - https://github.com/lucide-icons/lucide
 
+## Utilities
+- **UUID** (MIT License) - https://github.com/uuidjs/uuid
+
 ## Testing
 - **@testing-library/react** (MIT License) - https://github.com/testing-library/react-testing-library
 - **@testing-library/jest-dom** (MIT License) - https://github.com/testing-library/jest-dom
@@ -36,7 +39,7 @@ This project acknowledges and thanks the open source community for providing the
 
 ## Copyright Notice
 
-Copyright (c) 2024 AI Chat Application Frontend. All rights reserved.
+Copyright (c) 2025 AI Chat Application Frontend. All rights reserved.
 
 The original work is licensed under the MIT License. See LICENSE file for details.
 
