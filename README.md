@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19.2.0-blue.svg)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.18-38bdf8.svg)](https://tailwindcss.com/)
+[![Node](https://img.shields.io/badge/Node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
 
 A modern, responsive React-based chat interface prototype with AI assistant capabilities. This project was created by the author to demonstrate the integration and operation of various LLM (Large Language Model) interfaces.
 
