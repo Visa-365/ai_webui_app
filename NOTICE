@@ -1,0 +1,45 @@
+NOTICE
+
+This software includes third-party libraries and dependencies that are subject to their own licenses:
+
+## React Ecosystem
+- **React** (MIT License) - https://github.com/facebook/react
+- **React DOM** (MIT License) - https://github.com/facebook/react
+- **React Scripts** (MIT License) - https://github.com/facebook/create-react-app
+
+## UI and Styling
+- **Tailwind CSS** (MIT License) - https://github.com/tailwindlabs/tailwindcss
+- **PostCSS** (MIT License) - https://github.com/postcss/postcss
+- **Autoprefixer** (MIT License) - https://github.com/postcss/autoprefixer
+
+## Icons and Graphics
+- **Lucide React** (ISC License) - https://github.com/lucide-icons/lucide
+
+## Testing
+- **@testing-library/react** (MIT License) - https://github.com/testing-library/react-testing-library
+- **@testing-library/jest-dom** (MIT License) - https://github.com/testing-library/jest-dom
+- **@testing-library/user-event** (MIT License) - https://github.com/testing-library/user-event
+- **@testing-library/dom** (MIT License) - https://github.com/testing-library/dom-testing-library
+
+## Development Tools
+- **Web Vitals** (Apache License 2.0) - https://github.com/GoogleChrome/web-vitals
+
+## License Information
+
+All third-party libraries used in this project are open source and have been carefully selected for their compatibility and licensing terms. The majority of dependencies use permissive licenses (MIT, ISC, Apache 2.0) that allow for commercial use and modification.
+
+For complete license information, please refer to the individual package.json dependencies and their respective LICENSE files in node_modules.
+
+## Attribution
+
+This project acknowledges and thanks the open source community for providing these excellent tools and libraries that make modern web development possible.
+
+## Copyright Notice
+
+Copyright (c) 2024 AI Chat Application Frontend. All rights reserved.
+
+The original work is licensed under the MIT License. See LICENSE file for details.
+
+---
+
+For questions about third-party licenses or dependencies, please contact the project maintainers.
