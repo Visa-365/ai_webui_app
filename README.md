@@ -62,7 +62,7 @@ The application consists of a modular frontend structure designed for scalabilit
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Visa-365/ai_webui_app.git
    cd ai_webui_app/frontend
    ```
 
