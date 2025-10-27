@@ -9,6 +9,8 @@ A modern, responsive React-based chat interface prototype with AI assistant capa
 
 Please note: This is a front-end prototype and does not include a full backend, production-ready algorithms, or complete functional logic. It is intended for demonstration and development purposes.
 
+<img src="./Screenshot.jpg" alt="Screenshot" width="50%" />
+
 ## 🏗️ Architecture
 
 The application consists of a modular frontend structure designed for scalability:
