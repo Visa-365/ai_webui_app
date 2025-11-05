@@ -42,6 +42,12 @@ The application consists of a modular frontend structure designed for scalabilit
 - **Side Navigation**: Collapsible menu with user profile and settings
 - **Smooth Animations**: CSS transitions and hover effects throughout the interface
 
+## 🗺️ Planned Changes (Next)
+
+- Account page: move the current right-panel menu (opened via the account icon).
+- Right panel: replace the menu with a chat list at the top; add "+ new chat".
+- Localization: translate the app interface into multiple languages.
+
 ## 🛠️ Tech Stack
 
 - **React 19.2.0** - Modern React with latest features
