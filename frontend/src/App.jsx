@@ -1,26 +1,91 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Plus, Globe, Menu, Sun, Moon, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, Mic, Plus, Globe, Menu, Sun, Moon, User, ChevronDown, ChevronUp, X } from 'lucide-react';
 import logo from './logo.svg';
 import { v4 as uuidv4 } from 'uuid';
+import AccountPage from './AccountPage';
 
 const App = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: uuidv4(),
-      sender: 'assistant',
-      text: 'Good evening, User! How can I help you today?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  // Load data from localStorage on initialization
+  const loadChatsFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('app_chats');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error loading chats from storage:', error);
+      return [];
     }
-  ]);
+  };
+
+  const loadMessagesFromStorage = (chatId) => {
+    try {
+      const stored = localStorage.getItem(`app_messages_${chatId}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error loading messages from storage:', error);
+      return [];
+    }
+  };
+
+  const loadActiveChatIdFromStorage = () => {
+    try {
+      return localStorage.getItem('app_active_chat_id') || null;
+    } catch (error) {
+      console.error('Error loading active chat ID from storage:', error);
+      return null;
+    }
+  };
+
+  const [chats, setChats] = useState(loadChatsFromStorage);
+  const [activeChatId, setActiveChatId] = useState(loadActiveChatIdFromStorage);
+  const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [selectedModel, setSelectedModel] = useState('gpt-3.5-turbo');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountPageOpen, setIsAccountPageOpen] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
+
+  // Load messages for active chat on mount or when activeChatId changes
+  useEffect(() => {
+    if (activeChatId) {
+      const loadedMessages = loadMessagesFromStorage(activeChatId);
+      if (loadedMessages.length > 0) {
+        setMessages(loadedMessages);
+      } else {
+        // New chat - show empty messages (will show welcome screen)
+        setMessages([]);
+      }
+    } else {
+      // No active chat - show empty state
+      setMessages([]);
+    }
+  }, [activeChatId]);
+
+  // Save chats to localStorage whenever chats change
+  useEffect(() => {
+    try {
+      localStorage.setItem('app_chats', JSON.stringify(chats));
+    } catch (error) {
+      console.error('Error saving chats to storage:', error);
+    }
+  }, [chats]);
+
+  // Save active chat ID to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (activeChatId) {
+        localStorage.setItem('app_active_chat_id', activeChatId);
+      } else {
+        localStorage.removeItem('app_active_chat_id');
+      }
+    } catch (error) {
+      console.error('Error saving active chat ID to storage:', error);
+    }
+  }, [activeChatId]);
 
   const models = [
     'gpt-3.5-turbo',
@@ -68,15 +133,48 @@ const App = () => {
   const handleSendMessage = () => {
     if (!inputText.trim()) return;
     
+    let currentChatId = activeChatId;
+    const messageText = inputText;
+    
+    // Create new chat if no active chat
+    if (!activeChatId) {
+      currentChatId = uuidv4();
+      const newChat = {
+        id: currentChatId,
+        title: `Chat ${chats.length + 1}`,
+        lastMessage: messageText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setChats(prev => [newChat, ...prev]);
+      setActiveChatId(currentChatId);
+    }
+    
     // Add user message
     const newUserMessage = {
       id: uuidv4(),
       sender: 'user',
-      text: inputText,
+      text: messageText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     
-    setMessages(prev => [...prev, newUserMessage]);
+    const currentMessages = messages.length > 0 ? messages : [];
+    const updatedMessages = [...currentMessages, newUserMessage];
+    setMessages(updatedMessages);
+    
+    // Save messages to localStorage immediately
+    try {
+      localStorage.setItem(`app_messages_${currentChatId}`, JSON.stringify(updatedMessages));
+    } catch (error) {
+      console.error('Error saving messages to storage:', error);
+    }
+    
+    // Update chat's last message
+    setChats(prev => prev.map(chat => 
+      chat.id === currentChatId 
+        ? { ...chat, lastMessage: messageText, timestamp: newUserMessage.timestamp }
+        : chat
+    ));
+    
     setInputText('');
     
     // Simulate AI response after a short delay
@@ -89,7 +187,22 @@ const App = () => {
         model: selectedModel
       };
       
-      setMessages(prev => [...prev, aiResponse]);
+      const finalMessages = [...updatedMessages, aiResponse];
+      setMessages(finalMessages);
+      
+      // Save updated messages to localStorage
+      try {
+        localStorage.setItem(`app_messages_${currentChatId}`, JSON.stringify(finalMessages));
+      } catch (error) {
+        console.error('Error saving messages to storage:', error);
+      }
+      
+      // Update chat's last message with AI response
+      setChats(prev => prev.map(chat => 
+        chat.id === currentChatId 
+          ? { ...chat, lastMessage: aiResponse.text, timestamp: aiResponse.timestamp }
+          : chat
+      ));
     }, 1000);
   };
 
@@ -97,6 +210,31 @@ const App = () => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleDeleteChat = (chatId, e) => {
+    e.stopPropagation(); // Prevent chat selection when clicking delete
+    
+    // Remove chat from state
+    setChats(prev => prev.filter(chat => chat.id !== chatId));
+    
+    // Remove messages from localStorage
+    try {
+      localStorage.removeItem(`app_messages_${chatId}`);
+    } catch (error) {
+      console.error('Error removing messages from storage:', error);
+    }
+    
+    // If deleted chat was active, clear active chat and messages
+    if (activeChatId === chatId) {
+      setActiveChatId(null);
+      setMessages([]);
+      try {
+        localStorage.removeItem('app_active_chat_id');
+      } catch (error) {
+        console.error('Error removing active chat ID from storage:', error);
+      }
     }
   };
 
@@ -112,6 +250,17 @@ const App = () => {
     { icon: '🎵', label: 'Music Assistant' },
     { icon: '🎮', label: 'Games & Entertainment' }
   ];
+
+  // Show Account Page if opened
+  if (isAccountPageOpen) {
+    return (
+      <AccountPage 
+        menuItems={menuItems}
+        isDarkTheme={isDarkTheme}
+        onBack={() => setIsAccountPageOpen(false)}
+      />
+    );
+  }
 
   return (
     <div className={`h-screen ${isDarkTheme ? 'bg-black text-white' : 'bg-white text-gray-900'} flex flex-col`}>
@@ -183,41 +332,121 @@ const App = () => {
             className="absolute inset-0 bg-black bg-opacity-50"
             onClick={() => setIsMenuOpen(false)}
           ></div>
-          <div className={`absolute left-0 top-0 h-full w-64 shadow-xl transform transition-transform duration-300 ease-in-out ${
+          <div className={`absolute left-0 top-0 h-full w-64 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col ${
             isDarkTheme 
               ? 'bg-gray-900 border-r border-gray-800' 
               : 'bg-white border-r border-gray-200'
           }`}>
-            <div className={`p-4 border-b ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
-              <h2 className="text-lg font-semibold">Menu</h2>
+            <div className={`p-4 border-b flex-shrink-0 ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
+              <button
+                onClick={() => {
+                  const newChatId = uuidv4();
+                  const newChat = {
+                    id: newChatId,
+                    title: `Chat ${chats.length + 1}`,
+                    lastMessage: '',
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  };
+                  setChats(prev => [newChat, ...prev]);
+                  setActiveChatId(newChatId);
+                  // Initialize with empty messages for new chat
+                  setMessages([]);
+                  setIsMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  isDarkTheme 
+                    ? 'bg-gray-800 hover:bg-gray-700' 
+                    : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+              >
+                <Plus size={20} />
+                <span className="font-medium">New chat</span>
+              </button>
             </div>
-            <nav className="py-4">
-              {menuItems.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    item.action();
-                    setIsMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${
-                    isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-            <div className={`absolute bottom-0 w-full p-4 border-t ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
-              <div className="flex items-center space-x-3">
+            
+            {/* Chat List */}
+            <div className="flex-1 overflow-y-auto py-2 min-h-0">
+              {chats.length === 0 ? (
+                <div className={`px-4 py-8 text-center ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <p className="text-sm">No chats yet</p>
+                  <p className="text-xs mt-1">Create a new chat to get started</p>
+                </div>
+              ) : (
+                <div className="px-2">
+                  {chats.map((chat) => (
+                    <div
+                      key={chat.id}
+                      className="relative group mb-1"
+                    >
+                      <button
+                        onClick={() => {
+                          setActiveChatId(chat.id);
+                          // Load messages from localStorage for this chat
+                          const loadedMessages = loadMessagesFromStorage(chat.id);
+                          setMessages(loadedMessages);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          activeChatId === chat.id
+                            ? isDarkTheme
+                              ? 'bg-gray-800'
+                              : 'bg-gray-200'
+                            : isDarkTheme
+                              ? 'hover:bg-gray-800'
+                              : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1 pr-5">
+                          <span className={`font-medium text-sm truncate ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                            {chat.title}
+                          </span>
+                          {chat.timestamp && (
+                            <span className={`text-xs ml-2 flex-shrink-0 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {chat.timestamp}
+                            </span>
+                          )}
+                        </div>
+                        {chat.lastMessage && (
+                          <p className={`text-xs truncate ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {chat.lastMessage}
+                          </p>
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteChat(chat.id, e)}
+                        className={`absolute top-1 right-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ${
+                          isDarkTheme
+                            ? 'hover:bg-gray-700 text-gray-400 hover:text-white'
+                            : 'hover:bg-gray-300 text-gray-500 hover:text-gray-900'
+                        }`}
+                        title="Delete chat"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className={`p-4 border-t flex-shrink-0 ${isDarkTheme ? 'border-gray-800' : 'border-gray-200'}`}>
+              <button
+                onClick={() => {
+                  setIsAccountPageOpen(true);
+                  setIsMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-2 py-2 rounded-lg transition-colors ${
+                  isDarkTheme ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
+                }`}
+              >
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <User size={20} />
                 </div>
-                <div>
+                <div className="flex-1 text-left">
                   <p className="font-medium">User Name</p>
                   <p className="text-sm text-gray-400">Premium</p>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -230,18 +459,20 @@ const App = () => {
           onScroll={handleScroll}
           className="h-full overflow-y-auto px-4"
         >
-          {/* Welcome Header */}
-          <div className="flex items-center justify-center pt-8 pb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <img src={logo} alt="Logo" className="w-11 h-11 object-contain" />
-              </div>
-              <div className="text-center">
-                <h1 className="text-xl font-bold">Good evening</h1>
-                <p className="text-lg">User Name</p>
+          {/* Welcome Header - only show when no active chat */}
+          {!activeChatId && messages.length === 0 && (
+            <div className="flex items-center justify-center pt-8 pb-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <img src={logo} alt="Logo" className="w-11 h-11 object-contain" />
+                </div>
+                <div className="text-center">
+                  <h1 className="text-xl font-bold">Good evening</h1>
+                  <p className="text-lg">User Name</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Messages Container */}
           <div className="w-full max-w-3xl mx-auto space-y-4 pb-4">
